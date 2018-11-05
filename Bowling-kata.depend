@@ -1,7 +1,9 @@
 # depslib dependency file v1.0
-1541446333 source:c:\users\jean miche\desktop\bowling\bowling-kata\src\bowling.cpp
+1541451224 source:c:\users\jean miche\desktop\bowling\bowling-kata\src\bowling.cpp
 	<bowling.h>
 	<iostream>
+	<stdlib.h>
+	<ctype.h>
 
 1541449911 c:\users\jean miche\desktop\bowling\bowling-kata\include\bowling.h
 	<string>
