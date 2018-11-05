@@ -12,7 +12,7 @@ public:
     void processFrame(int);
 private:
     std::string data;
-    int frames[10];
+    unsigned int frames[10];
     bool prevWasStrike; // Flag upped if a strike happened in last frame
     bool prevPrevWasStrike;  // Flag upped if a strike happened in frame before the last one
     bool prevWasSpare; //Flag upped is the was frame was a spare
