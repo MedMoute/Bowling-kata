@@ -1,7 +1,7 @@
-#include "gtest/gtest.h"
+//#include "gtest/gtest.h"
 #include <bowling.h>
 
-
+/*
 TEST(Bowling, REPLACE_ME)
 {
     // Failing test
@@ -20,3 +20,4 @@ int main(int argc, char ** argv)
     ::testing::InitGoogleTest(&argc, argv);
     return RUN_ALL_TESTS();
 }
+*/
