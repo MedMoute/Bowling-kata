@@ -8,7 +8,7 @@ int main(int argc, char ** argv)
     if (argc==2) //The correct number of arguments was inputed
     {
         Bowling* line = new Bowling(argv[1]);
-        res = line->process();
+        res = line->processLine();
         if (res<0)
         {
             std::cout<<"The input line was not a valid one"<<std::endl;
