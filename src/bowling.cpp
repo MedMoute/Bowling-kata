@@ -49,190 +49,135 @@ int Bowling::processLine()
     }
 }
 
-void Bowling::processFrame(int i)
+void Bowling::updateFlags(bool _isstrike,bool _isspare)
 {
+    if(prevWasStrike)
+        prevPrevWasStrike=true;
+    else
+        prevPrevWasStrike=false;
+    if(_isspare)
+        prevWasSpare=true;
+    else
+        prevWasSpare=false;
+    if(_isstrike)
+        prevWasStrike=true;
+    else
+        prevWasStrike=false;
 
+}
+
+//Method updating the Frames array
+//returns true if the frame is ending on this throw
+//false if not
+bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& _isspare)
+{
     switch (*cur)
     {
     case 'X': //strike
-        if (prevPrevWasStrike)
-            frames[i-2]+=10;
-        if (prevWasStrike)
-            frames[i-1]+=10;
-        if (prevWasSpare)
-            frames[i-1]+=10;
-        frames[i]+=10;
-        //Setup flags
-        if(prevWasStrike)
-            prevPrevWasStrike=true;
-        else
-            prevPrevWasStrike=false;
-        prevWasStrike=true;
-        prevWasSpare=false;
-        //move iterator
-        ++cur;
-        if(i==9)//strike on 10th frame -> 2 more throws
-        {
-            prevPrevWasStrike=false;
-            switch (*cur)
-            {
-            case 'X':
-                if (prevPrevWasStrike)
-                    frames[i-2]+=10;
-                if (prevWasStrike)
-                    frames[i-1]+=10;
-                if (prevWasSpare)
-                    frames[i-1]+=10;
-                frames[i]+=10;
-
-                break;
-            default:
-                if (isdigit(*cur))  //1st char should be a number, or else the frame is invalid
-                {
-                    if (prevPrevWasStrike)
-                        frames[i-2]+=(*cur-'0');
-                    if (prevWasStrike)
-                        frames[i-1]+=(*cur-'0');
-                    if (prevWasSpare)
-                        frames[i-1]+=(*cur-'0');
-                    frames[i]+=(*cur-'0');
-                }
-                else
-                {
-                    frames[i]=-1;
-                }
-
-                break;
-            }
-
-       prevWasStrike=false;
-            ++cur;
-
-            switch (*cur)
-            {
-            case 'X':
-                if (prevPrevWasStrike)
-                    frames[i-2]+=10;
-                if (prevWasStrike)
-                    frames[i-1]+=10;
-                if (prevWasSpare)
-                    frames[i-1]+=10;
-                frames[i]+=10;
-                break;
-            default:
-                if (isdigit(*cur))  //1st char should be a number, or else the frame is invalid
-                {
-                    if (prevPrevWasStrike)
-                        frames[i-2]+=(*cur-'0');
-                    if (prevWasStrike)
-                        frames[i-1]+=(*cur-'0');
-                    if (prevWasSpare)
-                        frames[i-1]+=(*cur-'0');
-                    frames[i]+=(*cur-'0');
-                }
-                else
-                {
-                    frames[i]=-1;
-                }
-
-                break;
-            }
-            ++cur;
-
-        }
-        break;
-    case '\0': //end of array -usually wrong input
-        frames[i]=-1;
-        break;
-    default : //This is not a strike, there are 2 throws in this frame. The only case where there will be 3 throws is if i==10 and we do a spare or a strike
-        if (isdigit(*cur))  //1st char should be a number, or else the frame is invalid
+    {
+        if(counter==0 || i==9)//A valid spare can only be a first throw OR happening during the last frame
         {
             if (prevPrevWasStrike)
-                frames[i-2]+=(*cur-'0');
+                frames[i-2]+=10;
             if (prevWasStrike)
-                frames[i-1]+=(*cur-'0');
+                frames[i-1]+=10;
             if (prevWasSpare)
-                frames[i-1]+=(*cur-'0');
-            frames[i]+=(*cur-'0');
-        }
-        else
-        {
-            std::cout<<"pb at "<<i<<" : n'est pas un digit"<<std::endl;
-            frames[i]=-1;
-        }
-        ++cur;//move iterator
-
-        //update flags
-        if(prevWasStrike)
-        {
-            prevPrevWasStrike=true;
-            prevWasStrike=false;
-        }
-        if(prevPrevWasStrike)
-            prevPrevWasStrike=false;
-
-        // Processing the second throw
-        switch (*cur)
-        {
-        case '/': //spare
-            if (prevPrevWasStrike)
-                frames[i-2]+=(*cur-'0');
-            frames[i]+=(*cur-'0');
-            prevWasSpare=true;
-            prevWasStrike=false;
-            ++cur;//move iterator
-            if(i==9)//strike on 10th frame -> 1 more throw
-            {
-                switch (*cur)
-                {
-                case 'X':
-                    if (prevPrevWasStrike)
-                        frames[i-2]+=10;
-                    if (prevWasStrike)
-                        frames[i-1]+=10;
-                    if (prevWasSpare)
-                        frames[i-1]+=10;
-                    frames[i]+=10;
-                    break;
-                default:
-                    if (isdigit(*cur))  //1st char should be a number, or else the frame is invalid
-                    {
-                        if (prevPrevWasStrike)
-                            frames[i-2]+=(*cur-'0');
-                        if (prevWasStrike)
-                            frames[i-1]+=(*cur-'0');
-                        if (prevWasSpare)
-                            frames[i-1]+=(*cur-'0');
-                        frames[i]+=(*cur-'0');
-                    }
-                    else
-                    {
-                        frames[i]=-1;
-                    }
-
-                    break;
-                }
-            }
-            break;
-        default:
-            if (isdigit(*cur))  //2nd char should be a number or /, or else the frame is invalid
-            {
-                if (prevPrevWasStrike)
-                {
-                   frames[i-2]+=(*cur-'0');
-                    prevPrevWasStrike=false;
-                }
-                frames[i]+=(*cur-'0');
-
-            }
+                frames[i-1]+=10;
+            frames[i]+=10;
+            //
+            _isstrike=true;
+            _isspare=false;
+            //
+            if(i==9 && counter<2)//only case where the frame doesn't end after a strike
+                return false;
             else
-            {
-                std::cout<<"pb at "<<i<<" : n'est pas un digit"<<std::endl;
-                frames[i]=-1;
-            }
-            ++cur;//move iterator
-            break;
-        }
-        break;
+                return true;
     }
+    else//invalid strike entry
+    {
+        _isstrike=false;
+        _isspare=false;
+        frames[i]=-1;
+        return true;
+    }
+    }
+    break;
+case '/': //spare
+    if(counter==1)//A valid spare can ONLY be a second throw
+    {
+            if (prevPrevWasStrike)
+                frames[i-2]+=this->getCurrentSpareValue();
+            if (prevWasStrike)
+                frames[i-1]+=this->getCurrentSpareValue();
+            if (prevWasSpare)
+                frames[i-1]+=this->getCurrentSpareValue();
+            frames[i]+=this->getCurrentSpareValue();
+                        //
+            _isstrike=false;
+            _isspare=true;
+            //
+        if(i==9 && counter<2)//only case where the frame doesn't end after a spare
+            return false;
+        else
+            return true;
+    }
+    else//invalid spare entry
+    {
+        _isstrike=false;
+        _isspare=false;
+        frames[i]=-1;
+        return true;
+    }
+case '\0': //Unexpected end of array
+    _isstrike=false;
+    _isspare=false;
+    frames[i]=-1;
+    return true;
+    break;
+default:
+    if (isdigit(*cur))  //char should be a number, or else the frame is invalid
+    {
+        if (prevPrevWasStrike)
+            frames[i-2]+=(*cur-'0');
+        if (prevWasStrike)
+            frames[i-1]+=(*cur-'0');
+        if (prevWasSpare)
+            frames[i-1]+=(*cur-'0');
+        frames[i]+=(*cur-'0');
+    }
+    else
+    {
+        frames[i]=-1;
+    }
+    return false;
+    break;
+}
+}
+
+void Bowling::processFrame(int i)
+{
+    int counter=0;
+    bool framestop=false;
+    while (!framestop)
+    {
+        bool isspare=false;
+        bool isstrike=false;
+        framestop = this->updateFrames(i,counter,isstrike,isspare);
+        this->updateFlags(isstrike,isspare);
+        ++cur;
+        counter++;
+    }
+}
+
+//This method return the value of a throw that happened on a Spare
+int Bowling::getCurrentSpareValue()
+{
+    int res;
+    cur--; //move iterator back to previous throw
+    if((*cur-'0')<=9 && (*cur-'0')>=0)
+     res= 10-(*cur-'0');
+    else
+        res=-1; //the previous throw could not lead to a spare : ERROR
+    cur++; //move iterator back to current throw
+    return res;
 }
