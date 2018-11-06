@@ -6,14 +6,14 @@
 class Bowling //an instance of the bowling class correspond to a Line
 {
 public:
-    Bowling(char* _data);
+    Bowling(const char* _data);
     ~Bowling();
     int processLine();
     void processFrame(int);
 private:
     //Private methods
     bool updateFrames(int,int,bool&,bool&);
-    void updateFlags(bool,bool);
+    void updateFlags(int,int,bool,bool);
     int getCurrentSpareValue();
     //Members
     std::string data;

@@ -2,7 +2,7 @@
 //Standard I/O functions
 #include <iostream>
 
-int main(int argc, char ** argv)
+int mainRun(int argc, char ** argv)
 {
     int res = 0;
     if (argc==2) //The correct number of arguments was inputed

@@ -4,14 +4,10 @@
 #include <stdlib.h>
 #include <ctype.h>
 
-Bowling::Bowling(char* _data)
+Bowling::Bowling(const char* _data): frames{},prevWasStrike(false),prevPrevWasStrike(false),prevWasSpare(false)
 {
     data=std::string(_data);
-    *frames= {};
     cur = data.begin();
-    prevWasStrike=false;
-    prevPrevWasStrike=false;
-    prevWasSpare=false;
 };
 
 Bowling::~Bowling()
@@ -24,7 +20,14 @@ int Bowling::processLine()
     int i;
     for (i=0; i<10; i++)
     {
-        processFrame(i);
+        if(*cur=='\0')//input is too short
+        {
+            return -1;
+        }
+        else
+        {
+            processFrame(i);
+        }
     }
     if(*cur !='\0')//input has too much data
     {
@@ -35,7 +38,6 @@ int Bowling::processLine()
         int res=0; //Assuming the line is an empty sheet
         for (i=0; i<10; i++)
         {
-            std::cout<<*cur <<" "<<frames[i]<<std::endl;
             if(frames[i]>=0)
                 res+=frames[i];
             else //invalid data on the frame
@@ -49,20 +51,33 @@ int Bowling::processLine()
     }
 }
 
-void Bowling::updateFlags(bool _isstrike,bool _isspare)
+void Bowling::updateFlags(const int i,const int counter,bool _isstrike,bool _isspare)
 {
-    if(prevWasStrike)
-        prevPrevWasStrike=true;
+    if(i<9)
+    {
+
+        if(prevWasStrike)
+            prevPrevWasStrike=true;
+        else
+            prevPrevWasStrike=false;
+        if(_isspare)
+            prevWasSpare=true;
+        else
+            prevWasSpare=false;
+        if(_isstrike)
+            prevWasStrike=true;
+        else
+            prevWasStrike=false;
+    }
     else
-        prevPrevWasStrike=false;
-    if(_isspare)
-        prevWasSpare=true;
-    else
+    {
+        if(prevWasStrike)
+            prevPrevWasStrike=true;
+        else
+            prevPrevWasStrike=false;
         prevWasSpare=false;
-    if(_isstrike)
-        prevWasStrike=true;
-    else
         prevWasStrike=false;
+    }
 
 }
 
@@ -71,11 +86,14 @@ void Bowling::updateFlags(bool _isstrike,bool _isspare)
 //false if not
 bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& _isspare)
 {
+
+//Debug line
+//   std::cout<<"Processing current throw : "<<*cur<< " ("<<counter <<"th throw in the" <<i<< "th frame)"<<std::endl;
     switch (*cur)
     {
     case 'X': //strike
     {
-        if(counter==0 || i==9)//A valid spare can only be a first throw OR happening during the last frame
+        if(counter==0 || i==9)//A valid strike can only be a first throw OR happening during the last frame
         {
             if (prevPrevWasStrike)
                 frames[i-2]+=10;
@@ -92,19 +110,20 @@ bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& 
                 return false;
             else
                 return true;
+        }
+        else//invalid strike entry
+        {
+            _isstrike=false;
+            _isspare=false;
+            frames[i]=-1;
+            return true;
+        }
+        break;
     }
-    else//invalid strike entry
+    case '/': //spare
     {
-        _isstrike=false;
-        _isspare=false;
-        frames[i]=-1;
-        return true;
-    }
-    }
-    break;
-case '/': //spare
-    if(counter==1)//A valid spare can ONLY be a second throw
-    {
+        if(counter==1)//A valid spare can ONLY be a second throw
+        {
             if (prevPrevWasStrike)
                 frames[i-2]+=this->getCurrentSpareValue();
             if (prevWasStrike)
@@ -112,46 +131,64 @@ case '/': //spare
             if (prevWasSpare)
                 frames[i-1]+=this->getCurrentSpareValue();
             frames[i]+=this->getCurrentSpareValue();
-                        //
+            //
             _isstrike=false;
             _isspare=true;
             //
-        if(i==9 && counter<2)//only case where the frame doesn't end after a spare
-            return false;
-        else
+            if(i==9 && counter<2)//only case where the frame doesn't end after a spare
+                return false;
+            else
+                return true;
+        }
+        else//invalid spare entry
+        {
+            _isstrike=false;
+            _isspare=false;
+            frames[i]=-1;
             return true;
+        }
+        break;
     }
-    else//invalid spare entry
+    case '\0': //Unexpected end of array
     {
         _isstrike=false;
         _isspare=false;
         frames[i]=-1;
         return true;
+        break;
     }
-case '\0': //Unexpected end of array
-    _isstrike=false;
-    _isspare=false;
-    frames[i]=-1;
-    return true;
-    break;
-default:
-    if (isdigit(*cur))  //char should be a number, or else the frame is invalid
+    default:
     {
-        if (prevPrevWasStrike)
-            frames[i-2]+=(*cur-'0');
-        if (prevWasStrike)
-            frames[i-1]+=(*cur-'0');
-        if (prevWasSpare)
-            frames[i-1]+=(*cur-'0');
-        frames[i]+=(*cur-'0');
+        if ((*cur-'0')<=9 && (*cur-'0')>0 || *cur=='-')  //char should be a number or a miss, or else the frame is invalid
+        {
+            if (prevPrevWasStrike)
+               *cur=='-' ? frames[i-2] : frames[i-2]+=(*cur-'0');
+            if (prevWasStrike)
+                *cur=='-' ? frames[i-1] : frames[i-1]+=(*cur-'0');
+            if (prevWasSpare)
+                *cur=='-' ? frames[i-1] : frames[i-1]+=(*cur-'0');
+
+            *cur=='-' ? frames[i] : frames[i]+=(*cur-'0');
+            //
+            _isstrike=false;
+            _isspare=false;
+            //
+            if(counter==0 || ((i==9)&&(counter==1)&&(prevWasStrike)))
+                return false;
+            else
+                return true;
+        }
+        else
+        {
+            _isstrike=false;
+            _isspare=false;
+            frames[i]=-1;
+            return true;
+        }
+
+        break;
     }
-    else
-    {
-        frames[i]=-1;
     }
-    return false;
-    break;
-}
 }
 
 void Bowling::processFrame(int i)
@@ -163,7 +200,7 @@ void Bowling::processFrame(int i)
         bool isspare=false;
         bool isstrike=false;
         framestop = this->updateFrames(i,counter,isstrike,isspare);
-        this->updateFlags(isstrike,isspare);
+        this->updateFlags(i,counter,isstrike,isspare);
         ++cur;
         counter++;
     }
@@ -174,10 +211,15 @@ int Bowling::getCurrentSpareValue()
 {
     int res;
     cur--; //move iterator back to previous throw
-    if((*cur-'0')<=9 && (*cur-'0')>=0)
-     res= 10-(*cur-'0');
+    if((*cur-'0')<=9 && (*cur-'0')>0)
+        res= 10-(*cur-'0');
     else
-        res=-1; //the previous throw could not lead to a spare : ERROR
+    {
+        if(*cur=='-')
+            res=10;
+        else
+            res=-1; //the previous throw could not lead to a spare : ERROR
+    }
     cur++; //move iterator back to current throw
     return res;
 }

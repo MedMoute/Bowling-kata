@@ -214,3 +214,6 @@ pip-log.txt
 
 #Mr Developer
 .mr.developer.cfg
+
+#Do not commit the unzipped gtest source files
+gtest/

@@ -11,11 +11,14 @@
 				<Option object_output="obj/Debug/" />
 				<Option type="1" />
 				<Option compiler="gcc" />
-				<Option parameters="A" />
+				<Option parameters="12121212121212121212" />
 				<Compiler>
-					<Add option="-std=c++11" />
 					<Add option="-g" />
+					<Add option="-std=gnu++0x" />
 				</Compiler>
+				<Linker>
+					<Add library="3rdparty/gtest/gtest/bin/Debug/libgtest.a" />
+				</Linker>
 			</Target>
 			<Target title="Release">
 				<Option output="bin/Release/Bowling-kata" prefix_auto="1" extension_auto="1" />
@@ -24,18 +27,24 @@
 				<Option compiler="gcc" />
 				<Compiler>
 					<Add option="-O2" />
-					<Add option="-std=c++11" />
+					<Add option="-std=gnu++0x" />
 				</Compiler>
 				<Linker>
 					<Add option="-s" />
+					<Add library="3rdparty/gtest/gtest/bin/Release/libgtest.a" />
 				</Linker>
 			</Target>
 		</Build>
 		<Compiler>
 			<Add option="-Wall" />
 			<Add option="-std=c++11" />
+			<Add option="-std=gnu++0x" />
 			<Add directory="C:/Users/Jean Miche/Desktop/Bowling/Bowling-kata/include" />
+			<Add directory="3rdparty/gtest/googletest-master/googletest/include" />
 		</Compiler>
+		<Linker>
+			<Add library="3rdparty/gtest/gtest/bin/Debug/libgtest.a" />
+		</Linker>
 		<Unit filename="include/bowling.h" />
 		<Unit filename="src/bowling.cpp" />
 		<Unit filename="src/main.cpp" />
