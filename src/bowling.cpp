@@ -38,6 +38,8 @@ int Bowling::processLine()
         int res=0; //Assuming the line is an empty sheet
         for (i=0; i<10; i++)
         {
+            //Debug line
+            //   std::cout<<"Frames : ("<<i<< ") -> "<< frames[i]<<std::endl;
             if(frames[i]>=0)
                 res+=frames[i];
             else //invalid data on the frame
@@ -51,6 +53,7 @@ int Bowling::processLine()
     }
 }
 
+//Updates the boolean flags to fit the current situation
 void Bowling::updateFlags(const int i,const int counter,bool _isstrike,bool _isspare)
 {
     if(i<9)
@@ -88,7 +91,7 @@ bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& 
 {
 
 //Debug line
-//   std::cout<<"Processing current throw : "<<*cur<< " ("<<counter <<"th throw in the" <<i<< "th frame)"<<std::endl;
+//  std::cout<<"Processing current throw : "<<*cur<< " ("<<counter <<"th throw in the" <<i<< "th frame)"<<std::endl;
     switch (*cur)
     {
     case 'X': //strike
@@ -96,11 +99,11 @@ bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& 
         if(counter==0 || i==9)//A valid strike can only be a first throw OR happening during the last frame
         {
             if (prevPrevWasStrike)
-                frames[i-2]+=10;
+                frames[this->getFrameOfPrevPrevThrow(i,counter)]+=10;
             if (prevWasStrike)
-                frames[i-1]+=10;
+                frames[this->getFrameOfPrevThrow(i,counter)]+=10;
             if (prevWasSpare)
-                frames[i-1]+=10;
+                frames[this->getFrameOfPrevThrow(i,counter)]+=10;
             frames[i]+=10;
             //
             _isstrike=true;
@@ -122,14 +125,14 @@ bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& 
     }
     case '/': //spare
     {
-        if(counter==1)//A valid spare can ONLY be a second throw
+        if(counter>0)//A valid spare can ONLY be a second or third throw
         {
             if (prevPrevWasStrike)
-                frames[i-2]+=this->getCurrentSpareValue();
+                frames[this->getFrameOfPrevPrevThrow(i,counter)]+=this->getCurrentSpareValue();
             if (prevWasStrike)
-                frames[i-1]+=this->getCurrentSpareValue();
+                frames[this->getFrameOfPrevThrow(i,counter)]+=this->getCurrentSpareValue();
             if (prevWasSpare)
-                frames[i-1]+=this->getCurrentSpareValue();
+                frames[this->getFrameOfPrevThrow(i,counter)]+=this->getCurrentSpareValue();
             frames[i]+=this->getCurrentSpareValue();
             //
             _isstrike=false;
@@ -159,21 +162,30 @@ bool Bowling::updateFrames(const int i,const int counter,bool& _isstrike, bool& 
     }
     default:
     {
-        if ((*cur-'0')<=9 && (*cur-'0')>0 || *cur=='-')  //char should be a number or a miss, or else the frame is invalid
+        if (((*cur-'0')<=9 && (*cur-'0')>0 )|| *cur=='-')  //char should be a number or a miss, or else the frame is invalid
         {
+            if((*cur-'0')<=9 && (*cur-'0')>0 ) //if we hit some pins, we have to make sure there was still enough pins before
+            {
+                if(this->getRemainingPins()<=*cur-'0') //we hit more pins than the actual number of pins : ERROR
+                {
+                    frames[i]=-1;
+                    return true;
+                    break;
+                }
+            }
             if (prevPrevWasStrike)
-               *cur=='-' ? frames[i-2] : frames[i-2]+=(*cur-'0');
+                *cur=='-' ? frames[this->getFrameOfPrevPrevThrow(i,counter)] : frames[this->getFrameOfPrevPrevThrow(i,counter)]+=(*cur-'0');
             if (prevWasStrike)
-                *cur=='-' ? frames[i-1] : frames[i-1]+=(*cur-'0');
+                *cur=='-' ? frames[this->getFrameOfPrevThrow(i,counter)] : frames[this->getFrameOfPrevThrow(i,counter)]+=(*cur-'0');
             if (prevWasSpare)
-                *cur=='-' ? frames[i-1] : frames[i-1]+=(*cur-'0');
+                *cur=='-' ? frames[this->getFrameOfPrevThrow(i,counter)] : frames[this->getFrameOfPrevThrow(i,counter)]+=(*cur-'0');
 
             *cur=='-' ? frames[i] : frames[i]+=(*cur-'0');
             //
             _isstrike=false;
             _isspare=false;
             //
-            if(counter==0 || ((i==9)&&(counter==1)&&(prevWasStrike)))
+            if(counter==0 || ((i==9)&&(counter==1)&&(prevPrevWasStrike)))
                 return false;
             else
                 return true;
@@ -205,8 +217,26 @@ void Bowling::processFrame(int i)
         counter++;
     }
 }
+//This method return the number of pins that were present at the current throw
+int Bowling::getRemainingPins()
+{
+    int res;
+    cur--; //move iterator back to previous throw
+    if(*cur=='X'||*cur=='/') //Previous throw was a strike or a pair
+        res= 10; //10 pins up
+    else
+    {
+        if(((*cur-'0')<=9 && (*cur-'0')>0)
+                || *cur=='-')
+        {
+            *cur=='-' ? res = 10 :res=10-(*cur-'0') ;
+        }
+    }
+    cur++; //move iterator back to current throw
+    return res;
+}
 
-//This method return the value of a throw that happened on a Spare
+//This method return the value of a throw that happened to be a Spare
 int Bowling::getCurrentSpareValue()
 {
     int res;
@@ -222,4 +252,33 @@ int Bowling::getCurrentSpareValue()
     }
     cur++; //move iterator back to current throw
     return res;
+}
+
+int Bowling::getFrameOfPrevThrow(const int i,const int counter)
+{
+    if (counter>0)
+        return i;
+    else
+        return i-1;
+}
+
+int Bowling::getFrameOfPrevPrevThrow(int i,int counter)
+{
+    if (counter>1)
+        return i;
+    else
+    {
+        if(counter==1)
+        {
+            return i-1;
+        }
+        else
+        {
+            if(prevWasStrike)
+                return i-2;
+            else
+                return i-1;
+        }
+    }
+
 }

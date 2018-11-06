@@ -14,7 +14,13 @@ private:
     //Private methods
     bool updateFrames(int,int,bool&,bool&);
     void updateFlags(int,int,bool,bool);
+
     int getCurrentSpareValue();
+    int getRemainingPins();
+
+    int getFrameOfPrevThrow(int,int);
+    int getFrameOfPrevPrevThrow(int,int);
+
     //Members
     std::string data;
     int frames[10];

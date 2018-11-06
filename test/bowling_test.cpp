@@ -49,6 +49,29 @@ TEST(Bowling, FullStrike)
     delete line;
 }
 
+TEST(Bowling, AlmostPerfect1)
+{
+    std::string str="XXXXXXXXXX81";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (287, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, AlmostPerfect2)
+{
+    std::string str="XXXXXXXXXX9-";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (288, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, AlmostPerfect3)
+{
+    std::string str="XXXXXXXXXX8/";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (288, line->processLine());
+    delete line;
+}
 TEST(Bowling, WowUBad)
 {
     std::string str="--X---------5---/--";
@@ -62,6 +85,55 @@ TEST(Bowling, WowUTerrible)
     std::string str="--------------------";
     Bowling* line = new Bowling(str.c_str());
     EXPECT_EQ (0, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, TestWrongZeroNotation1)
+{
+    std::string str="00000000000000000000";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, TestWrongZeroNotation2)
+{
+    std::string str="00010000400056700000";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, TestWrongSyntax1)
+{
+    std::string str="AZERTYUIOP";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, TestImpossiblecase1)
+{
+    std::string str="66------------------";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
+    delete line;
+}
+
+TEST(Bowling, TestImpossiblecase2)
+{
+    std::string str="XXXXXXXXXX66";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
+    delete line;
+}
+
+
+TEST(Bowling, TestImpossiblecase3)
+{
+    std::string str="XXXXXXXXXX64";
+    Bowling* line = new Bowling(str.c_str());
+    EXPECT_EQ (-1, line->processLine());
     delete line;
 }
 
